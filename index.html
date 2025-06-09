@@ -1,30 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VPLY TELEPHONE DIARY</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/dark-wood.png');
+      background-size: cover;
+      color: #2e2e2e;
+    }
+
+    header {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    header img {
+      max-width: 240px;
+      height: auto;
+      margin: 10px auto;
+    }
+
+    .tabs {
+      display: flex;
+      background-color: #5d4037;
+      border-bottom: 2px solid #3e2723;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 1rem;
+      text-align: center;
+      color: #fff8e1;
+      cursor: pointer;
+      font-weight: bold;
+      border-right: 1px solid #795548;
+      background: linear-gradient(145deg, #6d4c41, #5d4037);
+    }
+
+    .tab.active {
+      background: #3e2723;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.96);
+      margin: 0 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 0.6rem;
+      margin: 0.4rem 0;
+      border-radius: 6px;
+      border: 1px solid #999;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #6d4c41;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #4e342e;
+    }
+
+    .entry-box {
+      background-color: #fff8e1;
+      border-left: 6px solid #6d4c41;
+      padding: 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .entry-box p {
+      margin: 0.3rem 0;
+    }
+
+    select {
+      background-color: #fdf6e3;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #aaa;
+      margin: 0.8rem 0;
+    }
+  </style>
 </head>
 <body>
-  <h1>VPLY TELEPHONE DIARY</h1>
 
-  <div class="form">
-    <input type="text" id="company" placeholder="Company Name">
-    <input type="text" id="phone" placeholder="Phone Number">
-    <input type="text" id="godown" placeholder="Godown Address">
-    <input type="text" id="owner" placeholder="Owner Name">
-    <input type="text" id="salesman" placeholder="Salesman Name">
-    <input type="text" id="products" placeholder="Products">
-    <input type="text" id="price" placeholder="Price Estimate">
-    <button onclick="saveEntry()">Save</button>
+  <header>
+    <img src="vply-logo.png" alt="VPLY Logo" />
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab(0)">Add Entry</div>
+    <div class="tab" onclick="showTab(1)">Search</div>
+    <div class="tab" onclick="showTab(2)">Manage/Delete</div>
   </div>
 
-  <hr>
+  <div class="tab-content active">
+    <form id="addForm">
+      <input id="company" placeholder="Company Name" required />
+      <input id="phone" placeholder="Phone Number" />
+      <input id="godown" placeholder="Godown Address" />
+      <input id="owner" placeholder="Owner Name" />
+      <input id="salesman" placeholder="Salesman Name" />
+      <textarea id="products" placeholder="Products"></textarea>
+      <input id="price" placeholder="Price Estimate" />
+      <input id="gst" placeholder="GST Details" />
+      <button type="submit">Save Entry</button>
+    </form>
+  </div>
 
-  <input type="text" id="search" placeholder="Search anything..." oninput="searchEntries()">
+  <div class="tab-content">
+    <input type="text" id="searchBox" placeholder="Search by any field..." oninput="searchEntries()" />
+    <div id="searchResults"></div>
+  </div>
 
-  <div id="results"></div>
+  <div class="tab-content">
+    <select id="selectCompany" onchange="showCompanyDetails()">
+      <option value="">-- Select Company --</option>
+    </select>
+    <div id="companyDetails"></div>
+  </div>
 
-  <script src="script.js"></script>
+  <script>
+    let data = JSON.parse(localStorage.getItem('vplyData')) || {};
+
+    function saveEntry(e) {
+      e.preventDefault();
+      const company = document.getElementById('company').value.trim();
+      if (!company) return alert("Company name is required");
+
+      data[company] = {
+        phone: document.getElementById('phone').value,
+        godown: document.getElementById('godown').value,
+        owner: document.getElementById('owner').value,
+        salesman: document.getElementById('salesman').value,
+        products: document.getElementById('products').value,
+        price: document.getElementById('price').value,
+        gst: document.getElementById('gst').value
+      };
+
+      localStorage.setItem('vplyData', JSON.stringify(data));
+      alert("Entry saved for " + company);
+      document.getElementById('addForm').reset();
+      loadCompanyOptions();
+    }
+
+    function searchEntries() {
+      const term = document.getElementById('searchBox').value.toLowerCase();
+      const resultsDiv = document.getElementById('searchResults');
+      resultsDiv.innerHTML = '';
+
+      for (let company in data) {
+        const values = [company, ...Object.values(data[company])].join(' ').toLowerCase();
+        if (values.includes(term)) {
+          const div = document.createElement('div');
+          div.className = 'entry-box';
+          div.innerHTML = formatEntry(company, data[company]);
+          resultsDiv.appendChild(div);
+        }
+      }
+    }
+
+    function loadCompanyOptions() {
+      const select = document.getElementById('selectCompany');
+      select.innerHTML = '<option value="">-- Select Company --</option>';
+      for (let company in data) {
+        const option = document.createElement('option');
+        option.value = company;
+        option.textContent = company;
+        select.appendChild(option);
+      }
+    }
+
+    function showCompanyDetails() {
+      const company = document.getElementById('selectCompany').value;
+      const detailsDiv = document.getElementById('companyDetails');
+      detailsDiv.innerHTML = '';
+
+      if (!company || !data[company]) return;
+
+      const entry = data[company];
+      detailsDiv.innerHTML = `
+        <div class="entry-box">
+          ${formatEntry(company, entry)}
+          <hr/>
+          <button onclick="deleteCompany('${company}')">Delete Entire Entry</button>
+          <p style="margin-top: 8px;">Delete Specific Field:</p>
+          ${Object.keys(entry).map(field => `<button onclick="deleteField('${company}','${field}')">${field}</button>`).join(' ')}
+        </div>
+      `;
+    }
+
+    function deleteCompany(company) {
+      if (confirm(`Delete entire entry for "${company}"?`)) {
+        delete data[company];
+        localStorage.setItem('vplyData', JSON.stringify(data));
+        loadCompanyOptions();
+        document.getElementById('companyDetails').innerHTML = '';
+      }
+    }
+
+    function deleteField(company, field) {
+      if (confirm(`Delete field "${field}" from "${company}"?`)) {
+        data[company][field] = '';
+        localStorage.setItem('vplyData', JSON.stringify(data));
+        showCompanyDetails();
+      }
+    }
+
+    function formatEntry(company, entry) {
+      return `
+        <p><strong>Company:</strong> ${company}</p>
+        <p><strong>Phone:</strong> ${entry.phone}</p>
+        <p><strong>Godown:</strong> ${entry.godown}</p>
+        <p><strong>Owner:</strong> ${entry.owner}</p>
+        <p><strong>Salesman:</strong> ${entry.salesman}</p>
+        <p><strong>Products:</strong> ${entry.products}</p>
+        <p><strong>Price:</strong> ${entry.price}</p>
+        <p><strong>GST:</strong> ${entry.gst}</p>
+      `;
+    }
+
+    function showTab(index) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
+      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === index));
+    }
+
+    document.getElementById('addForm').addEventListener('submit', saveEntry);
+    loadCompanyOptions();
+  </script>
+
 </body>
 </html>
