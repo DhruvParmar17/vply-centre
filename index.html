@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VPLY TELEPHONE DIARY</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>VPLY TELEPHONE DIARY</h1>
+
+  <div class="form">
+    <input type="text" id="company" placeholder="Company Name">
+    <input type="text" id="phone" placeholder="Phone Number">
+    <input type="text" id="godown" placeholder="Godown Address">
+    <input type="text" id="owner" placeholder="Owner Name">
+    <input type="text" id="salesman" placeholder="Salesman Name">
+    <input type="text" id="products" placeholder="Products">
+    <input type="text" id="price" placeholder="Price Estimate">
+    <button onclick="saveEntry()">Save</button>
+  </div>
+
+  <hr>
+
+  <input type="text" id="search" placeholder="Search anything..." oninput="searchEntries()">
+
+  <div id="results"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
