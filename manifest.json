@@ -1,0 +1,20 @@
+{
+  "name": "VPLY Telephone Diary",
+  "short_name": "VPLY Diary",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6d4c41",
+  "icons": [
+    {
+      "src": "vply-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "vply-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
